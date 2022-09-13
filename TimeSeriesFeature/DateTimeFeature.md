@@ -34,7 +34,9 @@ DateWave基于每个月的最后一天和第一天实际上距离最接近的假
 
 则编码为:
 
-$$code_{Day} = cos(\frac{d_{Day}}{C_{Day}}\times \pi)$$
+$$sin\_code_{Day} = sin(\frac{d_{Day}}{C_{Day}}\times \pi)\\
+cos\_code_{Day} = cos(\frac{d_{Day}}{C_{Day}}\times \pi)
+$$
 
 在上例中，$C_{Day} = 28/30/31$，当Part是月时，$C_{Month} = 12$，可以根据实际情况调整。
 
