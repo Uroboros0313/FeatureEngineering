@@ -1,7 +1,5 @@
-from multiprocessing.sharedctypes import Value
 import os
 import pickle as pkl
-from tabnanny import verbose
 
 import numpy as np
 import pandas as pd
@@ -14,6 +12,7 @@ import torch
 from pytorch_tabnet.tab_model import TabNetClassifier, TabNetRegressor
 from sklearn.metrics import roc_auc_score
 
+SEED = 2022
 
 class BaseModel():
     # TODO:implements BaseModel super class

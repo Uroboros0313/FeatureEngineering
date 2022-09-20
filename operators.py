@@ -6,8 +6,6 @@ from itertools import combinations, product
 from sklearn.neighbors import NearestNeighbors
 from joblib import Parallel, delayed
 
-import const
-
 
 class BaseOp(ABC):
     @abstractmethod
@@ -275,7 +273,7 @@ class GroupCnt(BaseOp):
     
     def fit(self, df):
         op = self.value_cnt_map
-        res = Parallel(n_jobs=const.JOBS, require='sharedmem')(
+        res = Parallel(n_jobs=-1, require='sharedmem')(
             delayed(op)(df[col]) for col in self.cols)
         
         self.map_dict.update(dict(res))
