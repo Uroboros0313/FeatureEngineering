@@ -399,4 +399,34 @@ class MinMaxScaler(BaseOp):
 
         return df
 
+class Bining(BaseOp):
+    def __init__(self, params):
+        self.num_bins = params.get('num_bins', 5)
+        self.cols = params.get('cols', [])
+        self.bin_method = params.get('bin_method', 'width') # [width, quantile]
+        self.include_offrange = params.get('include_offrange', True)
+        self.bins = {}
+    
+    def fit(self, df):
+
+        for col in self.cols:
+            if self.bin_method == 'width':
+                _, self.bins[col] = pd.cut(df[col], self.num_bins, retbins=True, labels=False)
+            elif self.bin_method == 'quantile':
+                _, self.bins[col] = pd.qcut(df[col], self.num_bins, retbins=True, labels=False)
+            else:
+                raise ValueError(f"Unknown bining method {self.bin_method}")
+            
+            if self.include_offrange:
+                self.bins[col][-1] = np.inf
+                self.bins[col][0] = -np.inf
+            
+    def transform(self, df):
+        
+        for col in self.cols:
+            df[col] = pd.cut(df[col], self.bins[col], labels=False, include_lowest=True)
+        
+        return df
+
+
 
