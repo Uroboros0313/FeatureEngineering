@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from itertools import combinations, product
 
 import numpy as np
 import pandas as pd
-from itertools import combinations, product
+from scipy import stats
 from sklearn.neighbors import NearestNeighbors
 from joblib import Parallel, delayed
 
@@ -18,6 +19,8 @@ class BaseOp(ABC):
 '''
 ROW FEATURE
 '''
+
+
 #DATE FEATURE
 class DateTimeSplit(BaseOp):
     def __init__(self, params):
@@ -56,6 +59,32 @@ class DateTimeSplit(BaseOp):
 
 
 #NUMERIC TRANSFORM
+class BoxCoxTransform(BaseOp):
+    def __init__(self, params):
+        self.cols = params.get('cols', [])
+        self.lmbds = {}
+        self.col_mins = {}
+
+    def fit(self, df: pd.DataFrame) -> None:
+        for col in self.cols:
+            col_vals = df[col]
+            col_min = col_vals.min()
+            self.col_mins[col] = col_min
+            if col_min <= 0:
+                col_vals = col_vals - col_min + 1
+            
+            _, lmbd = stats.boxcox(col_vals)
+            self.lmbds[col] = lmbd
+    
+    def transform(self, df: pd.DataFrame):
+        for col in self.cols:
+            if self.col_mins[col] <= 0:
+                df[col] = stats.boxcox(df[col] - self.col_mins[col] + 1, lmbda=self.lmbds[col])
+            elif self.col_mins[col] > 0:
+                df[col] = stats.boxcox(df[col], lmbda=self.lmbds[col])
+        return df
+
+
 class LogTransform(BaseOp):
     def __init__(self, params):
         self.cols = params.get("cols",None)
@@ -68,6 +97,7 @@ class LogTransform(BaseOp):
             df[col] = np.log(df[col] + 1)
 
         return df
+
 
 class NAdd(BaseOp):
     def __init__(self, params):
@@ -82,6 +112,7 @@ class NAdd(BaseOp):
 
         return df
 
+
 class NMinus(BaseOp):
     def __init__(self, params):
         self.col_pairs = params.get("col_pairs",None)
@@ -95,6 +126,7 @@ class NMinus(BaseOp):
 
         return df
 
+
 class NMul(BaseOp):
     def __init__(self, params):
         self.col_pairs = params.get("col_pairs",None)
@@ -107,6 +139,7 @@ class NMul(BaseOp):
             df[f"NMul_({col1})({col2})"] = df[col1]*df[col2]
 
         return df
+
 
 class NDiv(BaseOp):
     def __init__(self, params):
@@ -123,6 +156,7 @@ class NDiv(BaseOp):
 
         return df
 
+
 # CAT TRANSFORM
 class CatEqual(BaseOp):
     def __init__(self, params):
@@ -137,6 +171,7 @@ class CatEqual(BaseOp):
             df[f"{self.prefix}({col1})({col2})"] = (df[col1]==df[col2]).astype(int)
 
         return df
+
 
 class CatCross(BaseOp):
     def __init__(self, params):
@@ -161,6 +196,7 @@ class CatCross(BaseOp):
             df[f'{self.prefix}{comb[0]}_{comb[1]}'] = pd.Series(zip(df[comb[0]], df[comb[1]])).map(dct)
         return df
 
+
 class KeyTimeShift(BaseOp):
     def __init__(self, params):
         self.user_col = params.get('user_col', None)
@@ -181,6 +217,7 @@ class KeyTimeShift(BaseOp):
 
         return df
 
+
 class KeyTimeDiff(BaseOp):
     def __init__(self, params):
         self.user_col = params.get('user_col', None)
@@ -199,6 +236,7 @@ class KeyTimeDiff(BaseOp):
                 df[f"{col}_Diff_{i}"] = df.groupby(self.user_col)[col].diff(i)
 
         return df
+
 
 class TimeMinus2(BaseOp):
     def __init__(self, params):
@@ -224,6 +262,7 @@ class TimeMinus2(BaseOp):
 
         return df
 
+
 '''
 COL FEATURE
 '''
@@ -242,6 +281,7 @@ class DeleteCols(BaseOp):
 
         return df
 
+
 class GroupStats(BaseOp):
     def __init__(self, params):
         self.col_pairs = params.get('col_pairs', [])
@@ -259,6 +299,7 @@ class GroupStats(BaseOp):
             df[f'Group_{self.method}_({col1})({col2})'] = df[f'{col1}'].map(series).values
 
         return df
+ 
         
 class GroupCnt(BaseOp):
     def __init__(self, params):
@@ -285,6 +326,7 @@ class GroupCnt(BaseOp):
             df[f'{self.prefix}({col})'] = df[col].map(map_)
 
         return df
+
 
 class KNearestLabels(BaseOp):
     def __init__(self, params):
@@ -331,8 +373,8 @@ class KNearestLabels(BaseOp):
 
         return df
 
-# Encode
 
+# Encode
 class TargetEncode(BaseOp):
     def __init__(self, params):
         self.cols = params.get("cols",None)
@@ -358,6 +400,7 @@ class TargetEncode(BaseOp):
 
         return df
 
+
 class LabelEncode(BaseOp):
     def __init__(self, params):
         self.cols = params.get("cols", [])
@@ -375,6 +418,7 @@ class LabelEncode(BaseOp):
             df[col] = self.encoders[col].transform(df[col])
 
         return df
+
 
 class MinMaxScaler(BaseOp):
     def __init__(self, params):
@@ -398,6 +442,7 @@ class MinMaxScaler(BaseOp):
         df[self.select_cols] = tmp_df
 
         return df
+
 
 class Bining(BaseOp):
     def __init__(self, params):
