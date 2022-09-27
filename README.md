@@ -29,8 +29,8 @@ df = pd.DataFrame({
     'num_1': [1, 2, 1, 3]
 })
 
-op_name, op_params = op_dict['name'], op_dict['params']
-op_inst = eval(op_name)(op_params)
+op_name, op_params = op_dict['name'], op_dict['params'] # get name and params
+op_inst = eval(op_name)(op_params)# instantiate an op
 op_inst.fit(df)
 df = op_inst.transform(df)
 
