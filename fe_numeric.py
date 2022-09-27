@@ -76,6 +76,20 @@ class LogTransform(BaseFeature):
         return df
 
 
+class ExpTransform(BaseFeature):
+    def __init__(self, params):
+        self.cols = params.get("cols",None)
+
+    def fit(self,df):
+        pass
+    
+    def transform(self, df):
+        for col in self.cols:
+            df[col] = np.exp(df[col])
+
+        return df
+
+
 class NAdd(BaseFeature):
     def __init__(self, params):
         self.col_pairs = params.get("col_pairs",None)

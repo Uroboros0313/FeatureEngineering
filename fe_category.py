@@ -7,7 +7,9 @@ from joblib import Parallel, delayed
 from feature import BaseFeature
 
 
-# Encode
+'''
+CAT ENCODE
+'''
 class TargetEncode(BaseFeature):
     def __init__(self, params):
         self.cols = params.get("cols",None)
@@ -27,7 +29,7 @@ class TargetEncode(BaseFeature):
 
         for col in cols:
             if self.if_prefix:
-                df['TEncode_{}'.format(col)] = df[col].map(self.maps[col])
+                df[f'TargetEnc_{col}'] = df[col].map(self.maps[col])
             else:
                 df[col] = df[col].map(self.maps[col])
 
@@ -37,6 +39,7 @@ class TargetEncode(BaseFeature):
 class LabelEncode(BaseFeature):
     def __init__(self, params):
         self.cols = params.get("cols", [])
+        self.if_prefix = params.get('if_prefix', False)
         self.encoders = {}
 
     def fit(self, df):
@@ -48,12 +51,59 @@ class LabelEncode(BaseFeature):
     
     def transform(self, df):
         for col in self.cols:
-            df[col] = self.encoders[col].transform(df[col])
+            if self.if_prefix:
+                df[f'LabelEnc_{col}'] = self.encoders[col].transform(df[col])
+            else:
+                df[col] = self.encoders[col].transform(df[col])
+
+        return df
+ 
+        
+class CountEncode(BaseFeature):
+    def __init__(self, params):
+        self.cols = params.get('cols', [])
+        self.if_prefix = params.get('if_prefix', False)
+        self.map_dict = {}
+    
+    @staticmethod
+    def value_cnt_map(ss: pd.Series):
+        counts = ss.value_counts()
+        return ss.name, counts
+    
+    def fit(self, df):
+        op = self.value_cnt_map
+        res = Parallel(n_jobs=-1, require='sharedmem')(
+            delayed(op)(df[col]) for col in self.cols)
+        
+        self.map_dict.update(dict(res))
+
+    def transform(self, df):
+        df = df.copy()
+        for col in self.cols:
+            map_ = self.map_dict.get(col)
+            if self.if_prefix:
+                df[f'CntEnc_{col}'] = df[col].map(map_)
+            else:
+                df[col] = df[col].map(map_)
 
         return df
 
 
-# CAT TRANSFORM
+class OneHotEncode(BaseFeature):
+    pass
+
+
+class WoeEncode(BaseFeature):
+    pass
+
+
+class IVEncode(BaseFeature):
+    pass
+
+
+'''
+CAT FEATURE
+'''
 class CatEqual(BaseFeature):
     def __init__(self, params):
         self.col_pairs = params.get("col_pairs",None)
@@ -108,32 +158,5 @@ class GroupStats(BaseFeature):
         for col1, col2 in self.col_pairs:
             series = self.map_dicts.get(f'{col1}_{col2}')
             df[f'Group_{self.method}_({col1})({col2})'] = df[f'{col1}'].map(series).values
-
-        return df
- 
-        
-class GroupCnt(BaseFeature):
-    def __init__(self, params):
-        self.cols = params.get('cols', [])
-        self.prefix = params.get('prefix', 'GroupCnt_')
-        self.map_dict = {}
-    
-    @staticmethod
-    def value_cnt_map(ss: pd.Series):
-        counts = ss.value_counts()
-        return ss.name, counts
-    
-    def fit(self, df):
-        op = self.value_cnt_map
-        res = Parallel(n_jobs=-1, require='sharedmem')(
-            delayed(op)(df[col]) for col in self.cols)
-        
-        self.map_dict.update(dict(res))
-
-    def transform(self, df):
-        df = df.copy()
-        for col in self.cols:
-            map_ = self.map_dict.get(col)
-            df[f'{self.prefix}({col})'] = df[col].map(map_)
 
         return df

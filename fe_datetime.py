@@ -3,7 +3,7 @@ import numpy as np
 from feature import BaseFeature
 
 
-#DATE FEATURE
+# DATE FEATURE
 class DateTimeSplit(BaseFeature):
     def __init__(self, params):
         self.time_cols = params.get('time_cols', None)
