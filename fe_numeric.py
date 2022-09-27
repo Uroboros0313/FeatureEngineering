@@ -1,3 +1,8 @@
+# -*- encoding: utf-8 -*-
+#@File    :   fe_numeric.py
+#@Time    :   2022/09/28 02:09:10
+#@Author  :   Li Suchi 
+#@Email   :   lsuchi@126.com
 import numpy as np
 import pandas as pd
 from scipy import stats

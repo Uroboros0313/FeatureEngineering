@@ -1,3 +1,8 @@
+# -*- encoding: utf-8 -*-
+#@File    :   fe_category.py
+#@Time    :   2022/09/28 02:09:21
+#@Author  :   Li Suchi 
+#@Email   :   lsuchi@126.com
 from itertools import combinations, product
 
 import numpy as np

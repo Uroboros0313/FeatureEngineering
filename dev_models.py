@@ -1,3 +1,8 @@
+# -*- encoding: utf-8 -*-
+#@File    :   dev_models.py
+#@Time    :   2022/09/28 02:08:42
+#@Author  :   Li Suchi 
+#@Email   :   lsuchi@126.com
 import os
 import pickle as pkl
 
@@ -18,6 +23,12 @@ class BaseModel():
     # TODO:implements BaseModel super class
     pass
 
+
+# TODO: 实现lightgbm, catboost, xgboost的原生接口代码
+# TODO: 实现scikit-learn其余模型的接入
+# TODO: 实现并解耦time-series模型
+# models: LSTM, GRU, TCN, WaveNet, DeepAR, TFT, N-BEATS, Prophet, NeuralProphet
+# packages: gluonts, torch_forecasting, kats, darts
 
 class LGBMModel():
     def __init__(self, params={}):
