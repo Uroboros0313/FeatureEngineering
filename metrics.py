@@ -34,15 +34,17 @@ def MAPE(y, y_pred):
     return np.mean(np.abs(y - y_pred) / y)
 
 
-def MASK_MAPE(y, y_pred):
-    pass
+def WMAPE(y, y_pred):
+    return np.sum(np.abs(y - y_pred)) / np.sum(y)
 
 
 def SMAPE(y, y_pred):
-    pass
+    abs_minus = np.abs(y - y_pred)
+    abs_mean = (np.abs(y) + np.abs(y_pred)) / 2
+    return np.mean(abs_minus / abs_mean)
 
 
-def WMAPE(y, y_pred):
+def MASK_MAPE(y, y_pred):
     pass
 
 
