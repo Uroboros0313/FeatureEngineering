@@ -43,6 +43,7 @@ df = op_inst.transform(df)
 1. 补全特征工程算子
 2. 完成元类/父类定义
 3. 增加预处理/模型模块, 实现覆盖基本Tabular任务的pipeline
+4. 补全METRICS
 
 ## Rules for collaborators
 - Uroboros0313(lisuchi)
